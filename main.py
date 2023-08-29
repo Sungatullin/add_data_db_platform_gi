@@ -55,6 +55,6 @@ def add_data():
 
 
 if __name__ == '__main__':
-    # add_data()
     database.add_company(company_name=company_name, other_names=other_names_)
     database.link_user_with_company()
+    add_data()
