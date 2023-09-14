@@ -28,6 +28,15 @@ class DB:
         self.cur.close()
         self.conn.close()
 
+    def add_fluids(self):
+        fluids = ["вода",  "нефть", "газ"]
+        for fluid in fluids:
+            self.cur.execute(
+                '''INSERT INTO rest_fluid (name) VALUES ({!r}) 
+                   on conflict do nothing'''.format(fluid)
+            )
+            self.conn.commit()
+
     def add_company(self, company_name, other_names):
         other_names = '{' + f"{','.join(other_names)}" + '}'
         self.cur.execute(
@@ -54,7 +63,7 @@ class DB:
             f'''SELECT id FROM users_company WHERE name = '{company_name}' ''')
         company_id = self.cur.fetchone()[0]
         self.cur.execute(
-            '''INSERT INTO rest_field (name, kod, company_id, other_names) VALUES ({!r}, {}, {}, {!r}) 
+            '''INSERT INTO rest_field (name, code, company_id, other_names) VALUES ({!r}, {}, {}, {!r}) 
                on conflict do nothing'''.format(field_name, kod, company_id, other_names)
         )
         self.conn.commit()
@@ -64,7 +73,7 @@ class DB:
             f'''SELECT id FROM users_company WHERE name = '{company_name}' ''')
         company_id = self.cur.fetchone()[0]
         self.cur.execute(
-            '''INSERT INTO rest_horizon (full_name, company_id, other_names, kod) 
+            '''INSERT INTO rest_horizon (full_name, company_id, other_names, code) 
                VALUES ({!r}, {}, {!r}, {}) on conflict do nothing'''.format(
                full_name, company_id, other_names, kod)
         )
@@ -77,10 +86,10 @@ class DB:
         try:
             hor_kod = kod // 100
             self.cur.execute(
-                f'''SELECT id FROM rest_horizon WHERE kod = {hor_kod}''')
+                f'''SELECT id FROM rest_horizon WHERE code = {hor_kod}''')
             horizon_id = self.cur.fetchone()[0]
             xy = self.cur.execute(
-                '''INSERT INTO rest_layer (full_name, company_id, horizon_id, other_names, kod)
+                '''INSERT INTO rest_layer (full_name, company_id, horizon_id, other_names, code)
                    VALUES ({!r}, {}, {}, {!r}, {}) on conflict do nothing'''.format(
                    full_name, company_id, horizon_id, other_names, kod)
             )
@@ -107,33 +116,22 @@ class DB:
         except Exception as e:
             pass
 
-    def add_ngdu_shop(self, field_name: str, kod, ngdu_name: str, company_name, shops: list):
+    def add_ngdu_shop(self, kod, ngdu_name: str, company_name, shops: list):
         self.cur.execute(
             f'''SELECT id FROM users_company WHERE name = '{company_name}' ''')
         company_id = self.cur.fetchone()[0]
         try:
-            field_name = transliteration(field_name)
             self.cur.execute(
-                f'''SELECT id FROM rest_field WHERE '{field_name}' = Any(other_names)''')
-            field = self.cur.fetchone()
-            self.cur.execute(
-                f'''SELECT id FROM rest_ngdu WHERE '{kod}' = kod''')
+                f'''SELECT id FROM rest_ngdu WHERE code = '{kod}' ''')
             ngdu = self.cur.fetchone()
             if ngdu is None:
                 other_names_ngdus = "{" + transliteration(ngdu_name) + "}"
                 self.cur.execute(
-                    '''INSERT INTO rest_ngdu (name, kod, company_id, other_names)
+                    '''INSERT INTO rest_ngdu (name, code, company_id, other_names)
                        VALUES ({!r}, {}, {}, {!r}) on conflict do nothing'''.format(
                        ngdu_name, kod, company_id, other_names_ngdus)
                 )
-                self.cur.execute(
-                    f'''SELECT id FROM rest_ngdu WHERE '{kod}' = kod''')
-                ngdu = self.cur.fetchone()
-            self.cur.execute(
-                '''INSERT INTO rest_ngdu_fields (ngdu_id, field_id)
-                   VALUES ({}, {}) on conflict do nothing'''.format(
-                    ngdu[0], field[0])
-            )
+
             for shop in shops:
                 other_names_shops = "{" + transliteration(shop) + "}"
                 self.cur.execute(

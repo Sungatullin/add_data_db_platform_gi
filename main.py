@@ -34,7 +34,7 @@ def add_data():
         elems: dict = json.load(ngdus_)
     for row in elems:
         for field in row["fields"]:
-            database.add_ngdu_shop(field_name=field, kod=row["kod"], ngdu_name=row["name"],
+            database.add_ngdu_shop(kod=row["kod"], ngdu_name=row["name"],
                                    company_name=company_name, shops=row["shop"])
 
     # добавление горизонтов
@@ -55,6 +55,7 @@ def add_data():
 
 
 if __name__ == '__main__':
+    add_data()
+    database.add_fluids()
     database.add_company(company_name=company_name, other_names=other_names_)
     database.link_user_with_company()
-    add_data()
