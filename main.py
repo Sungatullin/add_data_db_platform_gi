@@ -55,7 +55,9 @@ def add_data():
 
 
 if __name__ == '__main__':
+    database.add_company(company_name=company_name, other_names=other_names_)
     add_data()
     database.add_fluids()
-    database.add_company(company_name=company_name, other_names=other_names_)
+    database.add_category()
+    database.add_sign()
     database.link_user_with_company()

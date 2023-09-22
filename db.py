@@ -37,6 +37,24 @@ class DB:
             )
             self.conn.commit()
 
+    def add_category(self):
+        categorys = ["добывающая", "нагнетательная", "водозаборная", "МСП", "ППД"]
+        for category in categorys:
+            self.cur.execute(
+                '''INSERT INTO rest_wellcategory (name) VALUES ({!r}) 
+                   on conflict do nothing'''.format(category)
+            )
+            self.conn.commit()
+
+    def add_sign(self):
+        signs = ["опорная", "исследуемая", "целевая"]
+        for sign in signs:
+            self.cur.execute(
+                '''INSERT INTO rest_wellsign (name) VALUES ({!r}) 
+                   on conflict do nothing'''.format(sign)
+            )
+            self.conn.commit()
+
     def add_company(self, company_name, other_names):
         other_names = '{' + f"{','.join(other_names)}" + '}'
         self.cur.execute(
@@ -52,7 +70,6 @@ class DB:
         self.cur.execute(
             f'''SELECT id FROM users_company''')
         company_id = self.cur.fetchone()[0]
-        print(user_id, company_id)
         self.cur.execute(
             f'''UPDATE users_user SET company_id = {company_id} WHERE id = {user_id}'''
         )
